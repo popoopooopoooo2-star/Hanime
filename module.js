@@ -14,10 +14,11 @@ function toCleanString(val) {
     return str;
 }
 
-/** * 1. SEARCH - Optimized for Speed 
- * Required Name: "search"
+/** * 1. SEARCH - With Lazy Loading (Infinite Scroll)
  */
 async function search(query, page) {
+    const currentPage = page || 1;
+    
     try {
         const response = await fetch("https://search.htv-services.com/", {
             method: 'POST',
@@ -30,9 +31,8 @@ async function search(query, page) {
                 "tags": [],
                 "order_by": "views",
                 "ordering": "desc",
-                "page": (page || 1) - 1,
-                // SPEED HACK: Only request the data Sora actually displays
-                "f": ["name", "slug", "cover_url"] 
+                "page": currentPage - 1, // Hanime API is 0-indexed
+                "f": ["name", "slug", "cover_url"] // SPEED HACK: Tiny data payload
             })
         });
 
@@ -41,23 +41,24 @@ async function search(query, page) {
         const data = await response.json();
         const hits = typeof data.hits === 'string' ? JSON.parse(data.hits) : (data.hits || []);
 
-        // Limit results per page to make the UI pop up instantly
-        const results = hits.slice(0, 15).map(item => ({
+        // MAP results to Sora format
+        const results = hits.map(item => ({
             title: toCleanString(item.name || item.slug),
             link: "https://hanime.tv/videos/hentai/" + safeString(item.slug),
             image: safeString(item.cover_url, "https://hanime.tv/favicon.ico")
         }));
 
+        // If we got 20+ hits, there's likely another page
         return {
             results: results,
-            nextPage: results.length > 0 ? (page || 1) + 1 : null
+            nextPage: results.length >= 20 ? currentPage + 1 : null
         };
     } catch (e) {
         return { results: [], nextPage: null };
     }
 }
 
-/** * 2. INFO - Required Name: "info"
+/** * 2. INFO - Fetches Video Details
  */
 async function info(url) {
     try {
@@ -79,7 +80,7 @@ async function info(url) {
     }
 }
 
-/** * 3. MEDIA - Required Name: "media"
+/** * 3. MEDIA - Lists the Episode
  */
 async function media(url) {
     try {
@@ -93,7 +94,7 @@ async function media(url) {
     }
 }
 
-/** * 4. SOURCES - Required Name: "sources"
+/** * 4. SOURCES - Gets the HLS Stream Links
  */
 async function sources(url) {
     try {
@@ -106,7 +107,6 @@ async function sources(url) {
         
         const streams = servers[0].streams || [];
         
-        // Formats as an array of quality objects for the picker
         return streams
             .filter(s => s.url !== "")
             .map(s => ({
@@ -114,13 +114,12 @@ async function sources(url) {
                 label: safeString(s.height) + "p"
             }))
             .sort((a, b) => parseInt(b.label) - parseInt(a.label));
-
     } catch (e) {
         return [];
     }
 }
 
-/** * 5. DISCOVER - Populates the App Home Screen
+/** * 5. DISCOVER - Home Screen Trending
  */
 async function discover() {
     try {
@@ -128,7 +127,7 @@ async function discover() {
         const data = await response.json();
         const videos = data.hentai_videos || [];
 
-        return videos.slice(0, 20).map(v => ({
+        return videos.slice(0, 15).map(v => ({
             title: toCleanString(v.name),
             link: "https://hanime.tv/videos/hentai/" + v.slug,
             image: v.cover_url
