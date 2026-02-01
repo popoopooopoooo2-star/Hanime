@@ -1,10 +1,11 @@
 const baseUrl = "https://hanime.tv";
 
-// Safety Helpers
+// Safety Helper: Ensures we never pass a null value to the app
 function safeString(val, fallback = "") {
     return val ? String(val) : fallback;
 }
 
+// Helper: Converts slugs to clean titles
 function toCleanString(val) {
     let str = safeString(val);
     if (str.includes('-') && !str.includes(' ')) {
@@ -13,7 +14,7 @@ function toCleanString(val) {
     return str;
 }
 
-// 1. SEARCH - Required name: "search"
+// 1. SEARCH: Required function name for Sora
 async function search(query, page) {
     try {
         const response = await fetch("https://search.htv-services.com/", {
@@ -23,7 +24,7 @@ async function search(query, page) {
                 "search_text": safeString(query),
                 "tags": [], "tags_mode": "AND", "brands": [], "blacklist": [],
                 "order_by": "views", "ordering": "desc", 
-                "page": (page || 1) - 1 
+                "page": (page || 1) - 1 // Hanime is 0-indexed
             })
         });
 
@@ -40,7 +41,7 @@ async function search(query, page) {
             image: safeString(item.cover_url, "https://hanime.tv/favicon.ico")
         }));
 
-        // Returns PagedResults object
+        // Returns PagedResults object required by Sora
         return {
             results: results,
             nextPage: results.length > 0 ? (page || 1) + 1 : null
@@ -50,7 +51,7 @@ async function search(query, page) {
     }
 }
 
-// 2. INFO - Required name: "info" (Replaces extractDetails)
+// 2. INFO: Required function name for Sora (details)
 async function info(url) {
     try {
         const slug = url.split('/').pop();
@@ -71,7 +72,7 @@ async function info(url) {
     }
 }
 
-// 3. MEDIA - Required name: "media" (Replaces extractEpisodes)
+// 3. MEDIA: Required function name for Sora (episodes list)
 async function media(url) {
     try {
         const slug = url.split('/').pop();
@@ -84,7 +85,7 @@ async function media(url) {
     }
 }
 
-// 4. SOURCES - Required name: "sources" (Replaces extractStreamUrl)
+// 4. SOURCES: Required function name for Sora (stream link)
 async function sources(url) {
     try {
         const slug = url.split('/').pop();
@@ -96,7 +97,7 @@ async function sources(url) {
         
         const streams = servers[0].streams || [];
         
-        // Return an array of objects with 'file' and 'label' keys
+        // Map streams to 'file' and 'label' objects for Sora's quality picker
         return streams.map(s => ({
             file: safeString(s.url),
             label: safeString(s.height) + "p"
