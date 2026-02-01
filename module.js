@@ -15,6 +15,7 @@ function toCleanString(val) {
 }
 
 /** * 1. SEARCH - Optimized for Speed 
+ * Required Name: "search"
  */
 async function search(query, page) {
     try {
@@ -30,7 +31,7 @@ async function search(query, page) {
                 "order_by": "views",
                 "ordering": "desc",
                 "page": (page || 1) - 1,
-                // SPEED HACK: Only request the specific data Sora needs
+                // SPEED HACK: Only request the data Sora actually displays
                 "f": ["name", "slug", "cover_url"] 
             })
         });
@@ -40,7 +41,7 @@ async function search(query, page) {
         const data = await response.json();
         const hits = typeof data.hits === 'string' ? JSON.parse(data.hits) : (data.hits || []);
 
-        // LIMIT results per page to make the UI render faster
+        // Limit results per page to make the UI pop up instantly
         const results = hits.slice(0, 15).map(item => ({
             title: toCleanString(item.name || item.slug),
             link: "https://hanime.tv/videos/hentai/" + safeString(item.slug),
@@ -56,7 +57,7 @@ async function search(query, page) {
     }
 }
 
-/** * 2. INFO (Details) 
+/** * 2. INFO - Required Name: "info"
  */
 async function info(url) {
     try {
@@ -78,13 +79,13 @@ async function info(url) {
     }
 }
 
-/** * 3. MEDIA (Episodes List) 
+/** * 3. MEDIA - Required Name: "media"
  */
 async function media(url) {
     try {
         const slug = url.split('/').pop();
         return [{
-            name: "Watch Now",
+            name: "Watch " + toCleanString(slug),
             url: safeString(url)
         }];
     } catch (e) {
@@ -92,7 +93,7 @@ async function media(url) {
     }
 }
 
-/** * 4. SOURCES (Streaming Qualities) 
+/** * 4. SOURCES - Required Name: "sources"
  */
 async function sources(url) {
     try {
@@ -105,7 +106,7 @@ async function sources(url) {
         
         const streams = servers[0].streams || [];
         
-        // Return structured sources for the app's video player
+        // Formats as an array of quality objects for the picker
         return streams
             .filter(s => s.url !== "")
             .map(s => ({
@@ -119,8 +120,7 @@ async function sources(url) {
     }
 }
 
-/** * 5. DISCOVER (Home Screen Content)
- * Adding this so the home screen isn't empty!
+/** * 5. DISCOVER - Populates the App Home Screen
  */
 async function discover() {
     try {
@@ -128,7 +128,7 @@ async function discover() {
         const data = await response.json();
         const videos = data.hentai_videos || [];
 
-        return videos.map(v => ({
+        return videos.slice(0, 20).map(v => ({
             title: toCleanString(v.name),
             link: "https://hanime.tv/videos/hentai/" + v.slug,
             image: v.cover_url
