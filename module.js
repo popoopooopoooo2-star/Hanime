@@ -1,35 +1,52 @@
 const baseUrl = "https://hanime.tv";
 // 1. SEARCH: Nuclear fast version
 async function search(query, page) {
+    const p = page || 1;
     try {
-        const res = await fetch("https://search.htv-services.com/", {
+        const response = await fetch("https://search.htv-services.com/", {
             method: 'POST',
             headers: { 
+                'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)' 
+                // This tells the server the request is coming from their own site
+                'Origin': 'https://hanime.tv',
+                'Referer': 'https://hanime.tv/',
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
             },
             body: JSON.stringify({
-                "search_text": query,
+                "search_text": String(query),
                 "tags": [],
                 "order_by": "views",
                 "ordering": "desc",
-                "page": (page || 1) - 1,
-                "f": ["name", "slug", "cover_url"]
+                "page": p - 1,
+                "f": ["name", "slug", "cover_url"] 
             })
         });
-        const data = await res.json();
-        const hits = typeof data.hits === 'string' ? JSON.parse(data.hits) : data.hits;
+
+        if (!response.ok) {
+            console.log("Server error: " + response.status);
+            return { results: [], nextPage: null };
+        }
+
+        const data = await response.json();
+        const hits = typeof data.hits === 'string' ? JSON.parse(data.hits) : (data.hits || []);
+
+        const results = hits.slice(0, 12).map(item => ({
+            title: String(item.name).replace(/-/g, ' '),
+            link: "https://hanime.tv/videos/hentai/" + item.slug,
+            image: item.cover_url
+        }));
 
         return {
-            results: hits.slice(0, 10).map(i => ({
-                title: i.name.replace(/-/g, ' '),
-                link: "https://hanime.tv/videos/hentai/" + i.slug,
-                image: i.cover_url
-            })),
-            nextPage: (page || 1) + 1
+            results: results,
+            nextPage: results.length >= 12 ? p + 1 : null
         };
-    } catch (e) { return { results: [], nextPage: null }; }
+    } catch (e) {
+        console.log("Search failed: " + e.message);
+        return { results: [], nextPage: null };
+    }
 }
+
 
 
 // 2. INFO: Details Page
