@@ -1,0 +1,10 @@
+{
+  "name": "Hanime Sora Module",
+  "sourceName": "Hanime.tv",
+  "baseUrl": "https://hanime.tv",
+  "scriptUrl": "https://raw.githubusercontent.com/popoopooopoooo2-star/Hanime/refs/heads/main/module.js?token=GHSAT0AAAAAADUQ7DX4KKI36RFJ3RR7WDV22L7QGTA",
+  "iconUrl": "https://hanime.tv/favicon.ico",
+  "type": "anime",
+  "version": 1,
+  "author": "me"
+}
