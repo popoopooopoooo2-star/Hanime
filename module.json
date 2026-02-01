@@ -2,15 +2,15 @@
   "sourceName": "Hanime",
   "iconUrl": "https://hanime.tv/favicon.ico",
   "author": {
-    "name": "popoopooopoooo2-star",
+    "name": "poopoopooopoooo2-star",
     "icon": "https://github.com/popoopooopoooo2-star.png"
   },
-  "version": "1.0.7",
+  "version": "1.0.8",
   "language": "English",
   "streamType": "HLS",
   "quality": "1080p",
   "baseUrl": "https://hanime.tv/",
-  "searchBaseUrl": "https://search.htv-services.com/%s",
+  "searchBaseUrl": "https://search.htv-services.com/",
   "scriptUrl": "https://raw.githubusercontent.com/popoopooopoooo2-star/Hanime/refs/heads/main/module.js",
   "type": "anime",
   "asyncJS": true,
