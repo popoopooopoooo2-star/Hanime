@@ -8,7 +8,7 @@
   "language": "English",
   "streamType": "HLS",
   "baseUrl": "https://hanime.tv",
-  "scriptUrl": "https://raw.githubusercontent.com/popoopooopoooo2-star/Hanime/refs/heads/main/module.js?token=GHSAT0AAAAAADUQ7DX4WBZCZZLH7A34LPNW2L7Q3FQ",
+  "scriptUrl": "https://raw.githubusercontent.com/popoopooopoooo2-star/Hanime/refs/heads/main/module.js",
   "type": "anime",
   "asyncJS": true
 }
