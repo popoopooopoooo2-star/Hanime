@@ -1,0 +1,14 @@
+{
+  "sourceName": "Hanime",
+  "iconUrl": "https://hanime.tv/favicon.ico",
+  "author": {
+    "name": "poopoopooopoooo2-star"
+  },
+  "version": "1.0.0",
+  "language": "English",
+  "streamType": "HLS",
+  "baseUrl": "https://hanime.tv",
+  "scriptUrl": "https://raw.githubusercontent.com/poopoopooopoooo2-star/Hanime/main/module.js",
+  "type": "anime",
+  "asyncJS": true
+}
